@@ -47,7 +47,22 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user.")
 
 
-def get_conversion_rates():
+def fetch_conversion_rates_from_api():
     json_data = requests.get("https://api.nbp.pl/api/exchangerates/tables/C/?format=json").json()
-    return {r['code']: r['ask'] for r in json_data[0]["rates"]}
+    curency_rates = {
+        "timestamp": datetime.now()
+    }
+
+    curency_rates["all_rates"] = {r['code']: r['ask'] for r in json_data[0]["rates"]}
+
+    return curency_rates
+
+
+CURRENCY_RATES = fetch_conversion_rates_from_api()
+
+
+def get_conversion_rates():
+    if CURRENCY_RATES['timestamp'] + timedelta(minutes=1) < datetime.now():
+        return fetch_conversion_rates_from_api()
+    return CURRENCY_RATES
 

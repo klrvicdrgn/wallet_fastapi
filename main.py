@@ -16,7 +16,12 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 
 @app.get("/wallet")
 async def wallet_status(user: user_dependency, db: db_dependency):
-    currency_rates = get_conversion_rates()
+    """
+    Wallet status.
+    Returns the current status of the wallet for each currency and total in PLN.
+    """
+    currency_rates_ts = get_conversion_rates()
+    currency_rates = currency_rates_ts["all_rates"]
     wallet = db.query(WalletCurrency).filter(WalletCurrency.user == user["id"])
     pln = wallet.filter(WalletCurrency.currency == "PLN").one_or_none()
 
@@ -35,12 +40,21 @@ async def wallet_status(user: user_dependency, db: db_dependency):
 
 @app.post("/wallet/add/{currency}/{amount}")
 async def add_money(currency: str, amount: int, user: user_dependency, db: db_dependency):
+    """
+    Add funds to wallet.
+
+    - **currency**: Three letter ISO currency code.
+    - **amount**: Amount in integer or decimal.
+
+    Returns the current status of the wallet for given currency.
+    """
     user_currency_amount = db.query(WalletCurrency).filter(
         WalletCurrency.user == user["id"], WalletCurrency.currency == currency.upper()).one_or_none()
 
-    currency_rates = get_conversion_rates()
+    currency_rates_ts = get_conversion_rates()
+    currency_rates = currency_rates_ts["all_rates"]
     if currency.upper() not in list(currency_rates.keys()) and currency.upper() != "PLN":
-        raise HTTPException(status_code=404, detail="Currency NOT FOUND!")
+        raise HTTPException(status_code=404, detail="Currency NOT AVAILABLE!")
 
     if user_currency_amount is None:
         create_user_currency_amount = WalletCurrency(
@@ -59,6 +73,14 @@ async def add_money(currency: str, amount: int, user: user_dependency, db: db_de
 
 @app.post("/wallet/subtract/{currency}/{amount}")
 async def subtract_money(currency: str, amount: int, user: user_dependency, db: db_dependency):
+    """
+    Remove funds from wallet.
+
+    - **currency**: Three letter ISO currency code.
+    - **amount**: Amount in integer or decimal.
+
+    Returns the current status of the wallet for given currency.
+    """
     user_currency_amount = db.query(WalletCurrency).filter(
         WalletCurrency.user == user["id"], WalletCurrency.currency == currency.upper()).one_or_none()
 
@@ -66,7 +88,7 @@ async def subtract_money(currency: str, amount: int, user: user_dependency, db: 
         raise HTTPException(status_code=404, detail="Currency NOT FOUND!")
     else:
         if user_currency_amount.amount - amount < 0:
-            raise HTTPException(status_code=404, detail=f"{amount} of {currency} NOT FOUND, you po'")
+            raise HTTPException(status_code=404, detail=f"{amount} {currency} is more than available balance.")
         else:
             user_currency_amount.amount -= amount
             db.commit()

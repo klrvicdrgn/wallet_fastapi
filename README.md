@@ -66,7 +66,7 @@ After the server is started successfully, you can test the endpoints functionali
 # USAGE
 
 ## Creating user
-User can be (and has to be) created on /auth in order to use the app.
+User HAS TO BE created on /auth in order to use the app.
 After user is created, login needs to happen in order to use
 
 > [!NOTE]

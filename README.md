@@ -68,7 +68,7 @@ After the server is started successfully, you can test the endpoints functionali
 
 ## Creating user
 User HAS TO BE created on /auth in order to use the app.
-After user is created, login needs to happen in order to use the endpoints (authorize button to authorize the access to the endpoints).
+After user is created, login needs to happen in order to use the endpoints (authorize button to authorize the access to the endpoints). Expiry is in 20 minutes, after which user needs to be logged in again.
 
 > [!NOTE]
 > ALL endpoints are protected and user needs to be logged in to use them.

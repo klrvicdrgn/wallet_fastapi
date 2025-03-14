@@ -5,6 +5,7 @@ from helpers import get_conversion_rates
 from models import Base, WalletCurrency
 import auth
 from helpers import get_current_user
+from starlette import status
 
 
 app = FastAPI()
@@ -50,7 +51,7 @@ async def add_money(currency: str, amount: int, user: user_dependency, db: db_de
     """
 
     if amount < 0:
-        raise HTTPException(status_code=400, detail="Amount needs to be a positive integer")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Amount needs to be a positive integer")
 
     user_currency_amount = db.query(WalletCurrency).filter(
         WalletCurrency.user == user["id"], WalletCurrency.currency == currency.upper()).one_or_none()
@@ -58,7 +59,7 @@ async def add_money(currency: str, amount: int, user: user_dependency, db: db_de
     currency_rates_ts = get_conversion_rates()
     currency_rates = currency_rates_ts["all_rates"]
     if currency.upper() not in list(currency_rates.keys()) and currency.upper() != "PLN":
-        raise HTTPException(status_code=404, detail="Currency NOT AVAILABLE!")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Currency NOT AVAILABLE!")
 
     if user_currency_amount is None:
         create_user_currency_amount = WalletCurrency(
@@ -87,16 +88,16 @@ async def subtract_money(currency: str, amount: int, user: user_dependency, db: 
     """
 
     if amount < 0:
-        raise HTTPException(status_code=400, detail="Amount needs to be a positive integer")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Amount needs to be a positive integer")
 
     user_currency_amount = db.query(WalletCurrency).filter(
         WalletCurrency.user == user["id"], WalletCurrency.currency == currency.upper()).one_or_none()
 
     if user_currency_amount is None:
-        raise HTTPException(status_code=404, detail="Currency NOT FOUND!")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Currency NOT FOUND!")
     else:
         if user_currency_amount.amount - amount < 0:
-            raise HTTPException(status_code=400, detail=f"{amount} {currency} is more than available balance.")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"{amount} {currency} is more than available balance.")
         else:
             user_currency_amount.amount -= amount
             db.commit()

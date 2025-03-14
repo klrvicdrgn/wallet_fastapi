@@ -32,7 +32,7 @@ async def create_user(
     username = create_user_request.username
 
     if db.query(User).filter(User.username == username).one_or_none():
-        raise HTTPException(status_code=400, detail=f"User {username} already exists.")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"User {username} already exists.")
 
     create_user_model = User(
         username=username,

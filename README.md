@@ -10,10 +10,7 @@ sudo apt update && sudo apt upgrade -yy && sudo apt autoremove
 
 ### Install packages
 ```bash
-sudo apt install \
-git
-docker
-docker-compose
+sudo apt install git docker docker-compose
 ```
 
 ## Start and enable docker service
@@ -22,7 +19,10 @@ sudo systemctl start docker.service
 sudo systemctl enable docker.service
 ```
 
-## To run docker without root
+## To run docker without root access
+> [!NOTE]
+> Without this you will have to use sudo every time
+
 ```bash
 sudo usermod -aG docker $USER
 sudo reboot
@@ -58,7 +58,8 @@ sudo systemctl restart NetworkManager
 sudo service docker restart
 ```
 
-Another issue with network can be due to VPN, please disable it for running project locally
+> [!NOTE]
+> Another issue with network can be due to VPN, please disable it for running project locally
 
 After the server is started successfully, you can test the endpoints functionalities on the follwing link http://127.0.0.1:8000/docs
 
@@ -67,10 +68,10 @@ After the server is started successfully, you can test the endpoints functionali
 
 ## Creating user
 User HAS TO BE created on /auth in order to use the app.
-After user is created, login needs to happen in order to use
+After user is created, login needs to happen in order to use the endpoints (authorize button to authorize the access to the endpoints).
 
 > [!NOTE]
->ALL endpoints are protected and user needs to be logged in to use them.
+> ALL endpoints are protected and user needs to be logged in to use them.
 
 ## Checking wallet
 Wallet can be seen on /wallet after login. 

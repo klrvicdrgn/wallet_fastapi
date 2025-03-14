@@ -48,6 +48,10 @@ async def add_money(currency: str, amount: int, user: user_dependency, db: db_de
 
     Returns the current status of the wallet for given currency.
     """
+
+    if amount < 0:
+        raise HTTPException(status_code=400, detail="Amount needs to be a positive integer")
+
     user_currency_amount = db.query(WalletCurrency).filter(
         WalletCurrency.user == user["id"], WalletCurrency.currency == currency.upper()).one_or_none()
 
@@ -81,6 +85,10 @@ async def subtract_money(currency: str, amount: int, user: user_dependency, db: 
 
     Returns the current status of the wallet for given currency.
     """
+
+    if amount < 0:
+        raise HTTPException(status_code=400, detail="Amount needs to be a positive integer")
+
     user_currency_amount = db.query(WalletCurrency).filter(
         WalletCurrency.user == user["id"], WalletCurrency.currency == currency.upper()).one_or_none()
 
@@ -88,7 +96,7 @@ async def subtract_money(currency: str, amount: int, user: user_dependency, db: 
         raise HTTPException(status_code=404, detail="Currency NOT FOUND!")
     else:
         if user_currency_amount.amount - amount < 0:
-            raise HTTPException(status_code=404, detail=f"{amount} {currency} is more than available balance.")
+            raise HTTPException(status_code=400, detail=f"{amount} {currency} is more than available balance.")
         else:
             user_currency_amount.amount -= amount
             db.commit()

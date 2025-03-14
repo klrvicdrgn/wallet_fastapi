@@ -29,8 +29,13 @@ async def create_user(
     db: db_dependency,
     create_user_request: CreateUserRequest
 ):
+    username = create_user_request.username
+
+    if db.query(User).filter(User.username == username).one_or_none():
+        raise HTTPException(status_code=400, detail=f"User {username} already exists.")
+
     create_user_model = User(
-        username=create_user_request.username,
+        username=username,
         hashed_pass=bcrypt_context.hash(create_user_request.password)
     )
     db.add(create_user_model)

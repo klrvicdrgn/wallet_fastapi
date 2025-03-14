@@ -62,7 +62,8 @@ CURRENCY_RATES = fetch_conversion_rates_from_api()
 
 
 def get_conversion_rates():
+    global CURRENCY_RATES
     if CURRENCY_RATES['timestamp'] + timedelta(minutes=1) < datetime.now():
-        return fetch_conversion_rates_from_api()
+        CURRENCY_RATES = fetch_conversion_rates_from_api()
     return CURRENCY_RATES
 
